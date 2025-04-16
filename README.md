@@ -8,7 +8,7 @@ pip install -r requirements.txt
 
 ## Dataset
 We collect 7 discrete-time dynamic graphs for model evaluation.
-1. Wikipedia is downloaded from http://snap.stanford.edu/jodie/.
+1. Wikipedia is downloaded from https://doi.org/10.5281/zenodo.7008205.
 2. The remaining datasets are obtained from https://github.com/snap-stanford/roland.
 
 ## Preprocessing
