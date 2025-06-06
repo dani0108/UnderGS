@@ -65,7 +65,7 @@ class GraphDiffusionEmbedding(EmbeddingModule):
 
         self.filter_ratio = args.filter_ratio
         self.layer_norm = nn.LayerNorm(n_node_features)
-        self.tcns = tcns(args.n_nodes, args.topk, args.lambda_1, args.lambda_2)
+        self.tcns = tcns(args.n_nodes, args.topk, args.lambda_1, args.lambda_2, device=self.device)
 
         # gcn | mlp_mixer
         self.backbone_type = backbone_type
@@ -75,14 +75,15 @@ class GraphDiffusionEmbedding(EmbeddingModule):
 
 
     def compute_embedding(self, unique_edge_indices, source_nodes, update_node_list, unique_nodes, unique_indices, timestamps, edge_idxs, n_samples, train):
+        
+        source_nodes = torch.from_numpy(source_nodes).long().to(self.device)
+        update_node_list = torch.from_numpy(update_node_list).long().to(self.device)
+        timestamps = torch.tensor(timestamps, device=self.device)
+        edge_idxs = torch.from_numpy(edge_idxs).long().to(self.device)
+        unique_edge_indices = torch.from_numpy(unique_edge_indices).long().to(self.device)
 
-        selected_node, selected_edge_idxs, selected_delta_time, selected_weight = self.tcns.streaming_topk(source_nodes, update_node_list, timestamps, edge_idxs, n_samples, unique_edge_indices)       
-
-        selected_node = torch.from_numpy(selected_node).long().to(self.device, non_blocking=True)
-        selected_edge_idxs = torch.from_numpy(selected_edge_idxs).long().to(self.device, non_blocking=True)
-        selected_delta_time = torch.from_numpy(selected_delta_time).float().to(self.device, non_blocking=True)
-        selected_weight = torch.from_numpy(selected_weight).float().to(self.device, non_blocking=True)
-
+        selected_node, selected_edge_idxs, selected_delta_time, selected_weight = self.tcns.update_tcns(source_nodes, update_node_list, timestamps, edge_idxs, n_samples, unique_edge_indices)
+        
         if self.filter_ratio != 0:
             subset_delta_time = selected_delta_time[:2 * n_samples]  
             nonzero_indices = subset_delta_time.nonzero(as_tuple=True)
@@ -142,7 +143,7 @@ class GraphModuleEmbedding(EmbeddingModule):
 
         self.n_layers = n_layers
         self.filter_ratio = args.filter_ratio
-        self.tcns = tcns(args.n_nodes, args.topk, args.lambda_1, args.lambda_2)
+        self.tcns = tcns(args.n_nodes, args.topk, args.lambda_1, args.lambda_2, device=self.device)
 
         if backbone_type == "graphsage":
             self.layers = torch.nn.ModuleList([
@@ -194,12 +195,13 @@ class GraphModuleEmbedding(EmbeddingModule):
 
     def compute_embedding(self, unique_edge_indices, source_nodes, update_node_list, unique_nodes, unique_indices, timestamps, edge_idxs, n_samples, train):
 
-        selected_node, selected_edge_idxs, selected_delta_time, selected_weight = self.tcns.streaming_topk(source_nodes, update_node_list, timestamps, edge_idxs, n_samples, unique_edge_indices)       
+        source_nodes = torch.from_numpy(source_nodes).long().to(self.device)
+        update_node_list = torch.from_numpy(update_node_list).long().to(self.device)
+        timestamps = torch.tensor(timestamps, device=self.device)
+        edge_idxs = torch.from_numpy(edge_idxs).long().to(self.device)
+        unique_edge_indices = torch.from_numpy(unique_edge_indices).long().to(self.device)
 
-        selected_node = torch.from_numpy(selected_node).long().to(self.device, non_blocking=True)
-        selected_edge_idxs = torch.from_numpy(selected_edge_idxs).long().to(self.device, non_blocking=True)
-        selected_delta_time = torch.from_numpy(selected_delta_time).float().to(self.device, non_blocking=True)
-        selected_weight = torch.from_numpy(selected_weight).float().to(self.device, non_blocking=True)
+        selected_node, selected_edge_idxs, selected_delta_time, selected_weight = self.tcns.update_tcns(source_nodes, update_node_list, timestamps, edge_idxs, n_samples, unique_edge_indices)
 
         selected_node = selected_node[unique_indices]
         selected_edge_idxs = selected_edge_idxs[unique_indices]
