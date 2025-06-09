@@ -171,8 +171,6 @@ class tcns:
         return batch_node, batch_edge_idxs, batch_delta_time, batch_weight
 
 
-
-
 key_type = nb.typeof((1, 1, 1))
 container_dict = nb.typed.Dict.empty(
     key_type = key_type,
