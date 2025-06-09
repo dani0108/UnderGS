@@ -75,12 +75,6 @@ class GraphDiffusionEmbedding(EmbeddingModule):
 
 
     def compute_embedding(self, unique_edge_indices, source_nodes, update_node_list, unique_nodes, unique_indices, timestamps, edge_idxs, n_samples, train):
-        
-        source_nodes = torch.from_numpy(source_nodes).long().to(self.device)
-        update_node_list = torch.from_numpy(update_node_list).long().to(self.device)
-        timestamps = torch.tensor(timestamps, device=self.device)
-        edge_idxs = torch.from_numpy(edge_idxs).long().to(self.device)
-        unique_edge_indices = torch.from_numpy(unique_edge_indices).long().to(self.device)
 
         selected_node, selected_edge_idxs, selected_delta_time, selected_weight = self.tcns.update_tcns(source_nodes, update_node_list, timestamps, edge_idxs, n_samples, unique_edge_indices)
         
@@ -194,12 +188,6 @@ class GraphModuleEmbedding(EmbeddingModule):
 
 
     def compute_embedding(self, unique_edge_indices, source_nodes, update_node_list, unique_nodes, unique_indices, timestamps, edge_idxs, n_samples, train):
-
-        source_nodes = torch.from_numpy(source_nodes).long().to(self.device)
-        update_node_list = torch.from_numpy(update_node_list).long().to(self.device)
-        timestamps = torch.tensor(timestamps, device=self.device)
-        edge_idxs = torch.from_numpy(edge_idxs).long().to(self.device)
-        unique_edge_indices = torch.from_numpy(unique_edge_indices).long().to(self.device)
 
         selected_node, selected_edge_idxs, selected_delta_time, selected_weight = self.tcns.update_tcns(source_nodes, update_node_list, timestamps, edge_idxs, n_samples, unique_edge_indices)
 

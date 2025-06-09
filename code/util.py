@@ -148,12 +148,6 @@ class tcns:
 
     def update_tcns(self, source_nodes, update_node_list, current_timestamp, edge_idxs, n_samples, unique_edge_indices):
 
-        source_nodes = source_nodes.detach().cpu().numpy()
-        update_node_list = update_node_list.detach().cpu().numpy()
-        current_timestamp = current_timestamp.item()
-        edge_idxs = edge_idxs.detach().cpu().numpy()
-        unique_edge_indices = unique_edge_indices.detach().cpu().numpy()
-
         tcns_keys = self.tcns_keys.detach().cpu().clone()
         tcns_weights = self.tcns_weights.detach().cpu().clone()
 
