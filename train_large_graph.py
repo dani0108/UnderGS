@@ -2,6 +2,7 @@ import os
 import time
 import torch
 import argparse
+import datetime
 import numpy as np
 from pathlib import Path
 from copy import deepcopy
@@ -18,7 +19,7 @@ parser.add_argument('--dataset_seed', type=int, default=822, help='Random seed f
 parser.add_argument('--node_dim', type=int, default=128, help='Dimensions of the node embedding')
 parser.add_argument('--time_dim', type=int, default=8, help='Dimensions of the time embedding')
 
-parser.add_argument('--gpu', type=int, default=2, help='Idx for the gpu to use')
+parser.add_argument('--gpu', type=int, default=0, help='Idx for the gpu to use')
 parser.add_argument('--bs', type=int, default=200, help='Batch size')
 parser.add_argument('--lr', type=float, default=0.0001, help='Learning rate')
 parser.add_argument('--drop_out', type=float, default=0, help='Dropout probability')
@@ -68,10 +69,6 @@ best_param = {'best_auc': 0, 'best_state': None}
 run_epoch_time = 0
 
 for epoch in range(args.n_epoch):
-	# test
-	if epoch == 22:
-		print("Pass")
-		break
 	t_epoch_train_start = time.time()
 	model.embedding_module.tcns.reset_tcns()
 	total_loss = 0
@@ -81,6 +78,7 @@ for epoch in range(args.n_epoch):
 
 		losses = torch.tensor(0.0).to(device)
 		n_batch = len(train_batches[snapshot_idx])
+		current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 		for batch_idx in range(n_batch):
 			sample_inds = train_batches[snapshot_idx][batch_idx]
