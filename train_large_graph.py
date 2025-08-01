@@ -24,7 +24,7 @@ parser.add_argument('--bs', type=int, default=200, help='Batch size')
 parser.add_argument('--lr', type=float, default=0.0001, help='Learning rate')
 parser.add_argument('--drop_out', type=float, default=0, help='Dropout probability')
 parser.add_argument('--n_epoch', type=int, default=50, help='Number of epochs')
-parser.add_argument('--backbone_type', type=str, default='gcn', choices=['gcn', 'mlp_mixer', 'graph_attention', 'graphsage', 'gin'], help='Select the backbone architecture')
+parser.add_argument('--neural_network', type=str, default='gcn', choices=['gcn', 'mlp_mixer', 'graph_attention', 'graphsage', 'gin'], help='Select the neural network for temporal structural learning')
 
 parser.add_argument('--topk', type=int, default=16, help='Keep the most influential neighbors')
 parser.add_argument('--filter_ratio', type=float, default=0, help='Time-aware filter ratio')
@@ -55,7 +55,7 @@ device = torch.device('cuda:{}'.format(args.gpu) if torch.cuda.is_available() el
 model = UnderGS(node_features=node_feats, edge_features=edge_feats, device=device,
 				dropout=args.drop_out,
 				node_dimension=args.node_dim, time_dimension=args.time_dim,
-				backbone_type=args.backbone_type,
+				neural_network=args.neural_network,
 				args=args)
 model = model.to(device)
 

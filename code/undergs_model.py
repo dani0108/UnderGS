@@ -7,7 +7,7 @@ from .util import TimeEncode
 
 
 class UnderGS(torch.nn.Module):
-    def __init__(self, node_features, edge_features, device, dropout, node_dimension, time_dimension, backbone_type, args):
+    def __init__(self, node_features, edge_features, device, dropout, node_dimension, time_dimension, neural_network, args):
         super(UnderGS, self).__init__()
 
         if node_features is not None:
@@ -25,7 +25,7 @@ class UnderGS(torch.nn.Module):
         time_encoder = TimeEncode(dimension = time_dimension)
         self.affinity_score = MergeLayer(node_dimension, node_dimension, node_dimension, 1)
 
-        self.embedding_module = get_embedding_module(backbone_type = backbone_type,
+        self.embedding_module = get_embedding_module(neural_network = neural_network,
                                                      node_features = node_features,
                                                      edge_features = edge_raw_features,
                                                      time_encoder = time_encoder,

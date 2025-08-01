@@ -1,11 +1,12 @@
+import time
 import torch
 from torch import nn
 from .util import tcns
-from .backbone_model import MLPMixer, GATLayer, MaxPoolingAggregator, GINLayer
+from .neural_networks import MLPMixer, GATLayer, MaxPoolingAggregator, GINLayer
 
 
-def get_embedding_module(backbone_type, node_features, edge_features, time_encoder, n_node_features, n_edge_features, n_time_features, device, dropout, args):
-    if backbone_type == "gcn" or backbone_type == "mlp_mixer":
+def get_embedding_module(neural_network, node_features, edge_features, time_encoder, n_node_features, n_edge_features, n_time_features, device, dropout, args):
+    if neural_network == "gcn" or neural_network == "mlp_mixer":
         return GraphDiffusionEmbedding(node_features=node_features,
                                        edge_features=edge_features,
                                        time_encoder=time_encoder,
@@ -15,8 +16,8 @@ def get_embedding_module(backbone_type, node_features, edge_features, time_encod
                                        device=device,
                                        dropout=dropout,
                                        args=args,
-                                       backbone_type=backbone_type)
-    if backbone_type == "graph_attention" or backbone_type == "graphsage" or backbone_type == "gin":
+                                       neural_network=neural_network)
+    if neural_network == "graph_attention" or neural_network == "graphsage" or neural_network == "gin":
         return GraphModuleEmbedding(node_features=node_features,
                                     edge_features=edge_features,
                                     time_encoder=time_encoder,
@@ -26,9 +27,9 @@ def get_embedding_module(backbone_type, node_features, edge_features, time_encod
                                     device=device,
                                     dropout=dropout,
                                     args=args, 
-                                    backbone_type=backbone_type)                                  
+                                    neural_network=neural_network)                                  
     else:
-        raise ValueError("Backbone {} not supported".format(backbone_type))
+        raise ValueError("The neural network {} is not supported".format(neural_network))
 
 
 class EmbeddingModule(nn.Module):
@@ -47,7 +48,7 @@ class EmbeddingModule(nn.Module):
 
 
 class GraphDiffusionEmbedding(EmbeddingModule):
-    def __init__(self, node_features, edge_features, time_encoder, n_node_features, n_edge_features, n_time_features, device, dropout, args, backbone_type):
+    def __init__(self, node_features, edge_features, time_encoder, n_node_features, n_edge_features, n_time_features, device, dropout, args, neural_network):
         super(GraphDiffusionEmbedding, self).__init__(node_features, edge_features, time_encoder, n_node_features, n_edge_features, n_time_features, device, dropout)
 
         neighbor_embedding_dimension = n_node_features + n_time_features +n_edge_features
@@ -68,16 +69,16 @@ class GraphDiffusionEmbedding(EmbeddingModule):
         self.tcns = tcns(args.n_nodes, args.topk, args.lambda_1, args.lambda_2, device=self.device)
 
         # gcn | mlp_mixer
-        self.backbone_type = backbone_type
+        self.neural_network = neural_network
         self.update_node_feature = torch.nn.Linear(n_node_features + n_node_features, n_node_features).to(device)
-        if self.backbone_type == "mlp_mixer":
+        if self.neural_network == "mlp_mixer":
             self.mlp_mixer = MLPMixer(num_tokens=args.topk, num_channels=n_node_features)
 
 
     def compute_embedding(self, unique_edge_indices, source_nodes, update_node_list, unique_nodes, unique_indices, timestamps, edge_idxs, n_samples, train):
 
         selected_node, selected_edge_idxs, selected_delta_time, selected_weight = self.tcns.update_tcns(source_nodes, update_node_list, timestamps, edge_idxs, n_samples, unique_edge_indices)
-        
+      
         if self.filter_ratio != 0:
             subset_delta_time = selected_delta_time[:2 * n_samples]  
             nonzero_indices = subset_delta_time.nonzero(as_tuple=True)
@@ -107,12 +108,12 @@ class GraphDiffusionEmbedding(EmbeddingModule):
         weights[weights_sum==0]=0
         neighbor_embeddings=neighbor_embeddings*weights[:,:,None]
 
-        if self.backbone_type == "mlp_mixer":
+        if self.neural_network == "mlp_mixer":
             neighbor_embeddings=self.mlp_mixer(neighbor_embeddings)
         neighbor_embeddings=torch.sum(neighbor_embeddings,dim=1)
         embeddings = torch.cat((source_embeddings,neighbor_embeddings),dim=1)
         embeddings = self.update_node_feature(embeddings)
-        if self.backbone_type == "mlp_mixer":
+        if self.neural_network == "mlp_mixer":
             embeddings = self.layer_norm(embeddings)
         with torch.no_grad():
             self.node_features[nodes_0] = embeddings
@@ -132,14 +133,14 @@ class GraphDiffusionEmbedding(EmbeddingModule):
 
 
 class GraphModuleEmbedding(EmbeddingModule):
-    def __init__(self, node_features, edge_features, time_encoder, n_node_features, n_edge_features, n_time_features, device, dropout, args, backbone_type, n_layers=1, n_heads=2):
+    def __init__(self, node_features, edge_features, time_encoder, n_node_features, n_edge_features, n_time_features, device, dropout, args, neural_network, n_layers=1, n_heads=2):
         super(GraphModuleEmbedding, self).__init__(node_features, edge_features, time_encoder, n_node_features, n_edge_features, n_time_features, device, dropout)
 
         self.n_layers = n_layers
         self.filter_ratio = args.filter_ratio
         self.tcns = tcns(args.n_nodes, args.topk, args.lambda_1, args.lambda_2, device=self.device)
 
-        if backbone_type == "graphsage":
+        if neural_network == "graphsage":
             self.layers = torch.nn.ModuleList([
                 MaxPoolingAggregator(
                     n_node_features=n_node_features,
@@ -151,7 +152,7 @@ class GraphModuleEmbedding(EmbeddingModule):
                     output_dimension=n_node_features)
                 for _ in range(n_layers)
             ])
-        elif backbone_type == "graph_attention":
+        elif neural_network == "graph_attention":
             self.layers = torch.nn.ModuleList([
                 GATLayer(
                     n_node_features=n_node_features,
@@ -163,7 +164,7 @@ class GraphModuleEmbedding(EmbeddingModule):
                     output_dimension=n_node_features)
                 for _ in range(n_layers)
             ])
-        elif backbone_type == "gin":
+        elif neural_network == "gin":
             self.layers = torch.nn.ModuleList([
                 GINLayer(
                     n_node_features=n_node_features,
@@ -176,7 +177,7 @@ class GraphModuleEmbedding(EmbeddingModule):
                 for _ in range(n_layers)
             ])
         else:
-            raise ValueError(f"Unsupported backbone: {backbone_type}")
+            raise ValueError(f"Unsupported neural_network: {neural_network}")
 
 
     def aggregate(self, source_node_features, neighbor_embeddings, edge_time_embeddings, edge_features, mask, weights):
