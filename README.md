@@ -23,7 +23,7 @@ python preprocessing/preprocess_data.py --data DATASET
 
 | Argument                 | Description                                                                 |
 |--------------------------|-----------------------------------------------------------------------------|
-| `--neural_network_type`  | Choice of neural network: `gcn`, `gin`, `graph_attention`, `graphsage`, `mlp_mixer`. |
+| `--neural_network_type`  | Choice of neural network: `gcn`, `gin`, `graph_attention`, `graphsage`, <br>`mlp_mixer`. |
 | `--filter_ratio`         | Ratio of historical neighbors to randomly mask. Range: `0` to `1`. |
 | `--lambda_1`             | Hop decay factor. Lower values represent stronger decay over hop distance. Range: `0` to `1`. |
 | `--lambda_2`             | Snapshot decay factor controlling how fast influence decays over snapshot. Smaller values represent faster decay. Range: `0` to `1`. |
