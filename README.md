@@ -23,7 +23,7 @@ python preprocessing/preprocess_data.py --data DATASET
 
 | Argument                 | Description                                                                 |
 |--------------------------|-----------------------------------------------------------------------------|
-| `--neural_network_type`  | Choice of neural network: `gcn`, `gin`, `graph_attention`, `graphsage`, `mlp_mixer`. |
+| `--neural_network`  | Choice of neural network: `gcn`, `gin`, `graph_attention`, `graphsage`, `mlp_mixer`. |
 | `--filter_ratio`         | Ratio of historical neighbors to randomly mask. Range: `0` to `1`. |
 | `--lambda_1`             | Hop decay factor. Lower values represent stronger decay over hop distance. Range: `0` to `1`. |
 | `--lambda_2`             | Snapshot decay factor controlling how fast influence decays over snapshot. Smaller values represent faster decay. Range: `0` to `1`. |
@@ -32,9 +32,9 @@ python preprocessing/preprocess_data.py --data DATASET
 
 Small Dataset
 ```sh
-    python train.py --data bitcoinotc --lr 0.001 --filter_ratio 0.1 --neural_network_type gcn
+    python train.py --data bitcoinotc --lr 0.001 --filter_ratio 0.1 --neural_network gcn
 ```
 Large Dataset
 ```sh
-    python train_large_graph.py --data reddit-body --lr 0.0005 --filter_ratio 0.4 --neural_network_type gcn
+    python train_large_graph.py --data reddit-body --lr 0.0005 --filter_ratio 0.4 --neural_network gcn
 ```
