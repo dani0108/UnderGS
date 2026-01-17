@@ -1,6 +1,11 @@
 Understanding Evolving Graph Structures for Large Discrete-Time Dynamic Graph Representation
 =============================================================================
 
+This repository contains the code and experimental artifacts for our accepted **pVLDB (VLDB 2026)** paper:
+**"Understanding Evolving Graph Structures for Large Discrete-Time Dynamic Graph Representation"**.
+It supports end-to-end reproduction of the main experiments, including dataset preparation, preprocessing
+into discrete-time dynamic graph snapshots, and model training/evaluation.
+
 ## Requirements
 ```sh
 pip install -r requirements.txt
