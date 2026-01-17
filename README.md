@@ -14,7 +14,7 @@ We collect 7 discrete-time dynamic graphs for model evaluation.
 2. The remaining datasets are obtained from https://github.com/snap-stanford/roland.
 
 ## Preprocessing
-Generate discrete-time dynamic graphs with the following command.
+Generate the discrete-time dynamic graphs with the following command.
 ```sh
 python preprocessing/preprocess_data.py --data DATASET
 ```
