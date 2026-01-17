@@ -1,7 +1,7 @@
 UnderGS
 =============================================================================
 
-This is the repository for the code and data of the VLDB 2026 paper: Understanding Evolving Graph Structures for Large Discrete-Time Dynamic Graph Representation.
+This is the repository for the code of the VLDB 2026 paper: Understanding Evolving Graph Structures for Large Discrete-Time Dynamic Graph Representation.
 
 ## Requirements
 ```sh
